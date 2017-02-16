@@ -1,20 +1,18 @@
 package eu.babkin.vk.bot;
 
-import com.google.gson.Gson;
-import com.vk.api.sdk.client.TransportClient;
-import com.vk.api.sdk.client.VkApiClient;
-import com.vk.api.sdk.client.actors.UserActor;
-import com.vk.api.sdk.httpclient.HttpTransportClient;
-import com.vk.api.sdk.objects.UserAuthResponse;
+import com.vk.api.sdk.exceptions.ApiException;
+import com.vk.api.sdk.exceptions.ClientException;
+import eu.babkin.vk.bot.event.VkEventListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.PropertySource;
 
 @SpringBootApplication
-public class BotStarter  {
+public class BotStarter {
 
-    public static void main(String[] args) {
-        SpringApplication.run(BotStarter.class, args);
+    public static void main(String[] args) throws ClientException, ApiException {
+        ConfigurableApplicationContext context = SpringApplication.run(BotStarter.class, args);
+
+        context.getBean(VkEventListener.class).start();
     }
 }

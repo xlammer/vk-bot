@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compile 'com.vk.api:sdk:0.4.3'
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.0.1'
+    compile 'com.codeborne:selenide:4.3'
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "spring-boot-starter-tomcat"
     }
