@@ -1,15 +1,19 @@
-package eu.babkin.vk.bot.service;
+package eu.babkin.vk.bot.messages;
 
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
-import eu.babkin.vk.bot.event.updates.UpdateNotifier;
+import com.vk.api.sdk.objects.photos.Photo;
 import eu.babkin.vk.bot.event.updates.MessageUpdate;
+import eu.babkin.vk.bot.event.updates.UpdateNotifier;
+import eu.babkin.vk.bot.photo.PhotoUploader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static eu.babkin.vk.bot.messages.AttachmentUtils.toAttachment;
 
 @Service
 public class ChatService implements UpdateNotifier<MessageUpdate> {
@@ -20,6 +24,9 @@ public class ChatService implements UpdateNotifier<MessageUpdate> {
 
     private final VkApiClient vk;
     private final UserActor actor;
+
+    @Autowired
+    private PhotoUploader photoUploader;
 
     @Autowired
     public ChatService(VkApiClient vk, UserActor actor) {
@@ -42,5 +49,10 @@ public class ChatService implements UpdateNotifier<MessageUpdate> {
         if (messageUpdate.getMessage().startsWith("/bot")) {
             sendMessage("hello!", messageUpdate.getChatId());
         }
+
+    }
+
+    private void sendPhoto(Photo photo, int chatId) throws ClientException, ApiException {
+        vk.messages().send(actor).chatId(chatId).attachment(toAttachment(photo)).execute();
     }
 }

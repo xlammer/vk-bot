@@ -64,7 +64,6 @@ public class PollingEventListener {
     }
 
     private void poll() {
-        logger.info("querying with ts={}", ts);
         HttpUriRequest request = RequestBuilder.get(basePollingUri).addParameter("ts", ts.toString()).build();
 
         HttpResponse response;

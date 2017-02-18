@@ -1,5 +1,6 @@
 package eu.babkin.vk.bot.oauth;
 
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.WebDriverRunner;
 import com.vk.api.sdk.client.VkApiClient;
@@ -16,9 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 
 @Service
 @PropertySource("classpath:secret.properties")
@@ -49,6 +48,7 @@ public class Authenticator {
     @Autowired
     public Authenticator(VkApiClient vk) {
         this.vk = vk;
+        Configuration.browser = WebDriverRunner.CHROME;
     }
 
     private String getAccessToken() {
