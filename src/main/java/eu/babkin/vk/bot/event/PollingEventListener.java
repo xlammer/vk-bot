@@ -6,6 +6,8 @@ import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import com.vk.api.sdk.objects.messages.LongpollParams;
+import eu.babkin.vk.bot.event.updates.MessageUpdate;
+import eu.babkin.vk.bot.event.updates.UpdateNotifier;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -19,36 +21,41 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.Map;
 
 @Service
-public class VkEventListener {
+public class PollingEventListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(VkEventListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(PollingEventListener.class);
 
     private final HttpClient httpClient;
-    private final RequestBuilder requestBuilder;
     private final TaskExecutor taskExecutor;
+    private final URI basePollingUri;
 
     private Integer ts;
 
     @Autowired
-    public VkEventListener(TaskExecutor taskExecutor, VkApiClient vk, UserActor actor) throws ClientException, ApiException {
+    private Gson gson;
+
+    @Autowired
+    private UpdateNotifier<MessageUpdate> messageNotifier;
+
+    @Autowired
+    public PollingEventListener(TaskExecutor taskExecutor, VkApiClient vk, UserActor actor) throws ClientException, ApiException {
         this.taskExecutor = taskExecutor;
         LongpollParams params = vk.messages().getLongPollServer(actor).execute();
 
-        requestBuilder = RequestBuilder.get("https://" + params.getServer())
+        basePollingUri = RequestBuilder.get("https://" + params.getServer())
                 .addParameter("act", "a_check")
                 .addParameter("key", params.getKey())
                 .addParameter("wait", "25")
                 .addParameter("mode", "2")
-                .addParameter("version", "1");
+                .addParameter("version", "1").build().getURI();
 
         this.ts = params.getTs();
         this.httpClient = HttpClientBuilder.create().build();
 
-        taskExecutor.execute(this::poll);
         logger.info("Event listener started");
     }
 
@@ -57,7 +64,8 @@ public class VkEventListener {
     }
 
     private void poll() {
-        HttpUriRequest request = requestBuilder.addParameter("ts", ts.toString()).build();
+        logger.info("querying with ts={}", ts);
+        HttpUriRequest request = RequestBuilder.get(basePollingUri).addParameter("ts", ts.toString()).build();
 
         HttpResponse response;
         try {
@@ -75,11 +83,15 @@ public class VkEventListener {
             return;
         }
 
-        logger.debug("got json string {}", jsonString);
-        Map result = new Gson().fromJson(jsonString, Map.class); // FIXME: add proper deserialization
+        logger.debug("EVT_IN: {}", jsonString);
+        Event event = gson.fromJson(jsonString, Event.class);
 
-        logger.info("update -> {}", result);
-        ts = (Integer) result.get("ts");
+        ts = event.getTs();
+
+        event.getUpdates().stream()
+                .filter( update -> update instanceof MessageUpdate)
+                .forEach( update -> messageNotifier.onUpdate((MessageUpdate) update));
+
         poll();
     }
 

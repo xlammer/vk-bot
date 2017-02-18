@@ -4,30 +4,30 @@ import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
-import eu.babkin.vk.bot.event.messages.IncomingMessagesListener;
+import eu.babkin.vk.bot.event.updates.UpdateNotifier;
+import eu.babkin.vk.bot.event.updates.MessageUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ChatService implements IncomingMessagesListener {
+public class ChatService implements UpdateNotifier<MessageUpdate> {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     private static final String MSG_PREFIX = "BOT -> ";
 
-    @Value("${bot.chat.id}")
-    private int chatId;
+    private final VkApiClient vk;
+    private final UserActor actor;
 
     @Autowired
-    private VkApiClient vk;
+    public ChatService(VkApiClient vk, UserActor actor) {
+        this.vk = vk;
+        this.actor = actor;
+    }
 
-    @Autowired
-    private UserActor actor;
-
-    public void sendMessage(String message) {
+    public void sendMessage(String message, int chatId) {
         try {
             vk.messages().send(actor).chatId(chatId).message(MSG_PREFIX + message).execute();
         } catch (ApiException e) {
@@ -38,7 +38,9 @@ public class ChatService implements IncomingMessagesListener {
     }
 
     @Override
-    public void onMessage(String msg) {
-
+    public void onUpdate(MessageUpdate messageUpdate) {
+        if (messageUpdate.getMessage().startsWith("/bot")) {
+            sendMessage("hello!", messageUpdate.getChatId());
+        }
     }
 }
