@@ -1,8 +1,9 @@
-package eu.babkin.vk.bot.event.updates;
+package eu.babkin.vk.bot.messages;
 
 import com.google.common.base.MoreObjects;
+import eu.babkin.vk.bot.event.updates.Update;
 
-public class MessageUpdate extends Update {
+public class IncomingMessage extends Update {
 
     private long timestamp;
 
@@ -12,7 +13,7 @@ public class MessageUpdate extends Update {
 
     private String chatName;
 
-    private int chatId;
+    private int peerId;
 
 
     public long getTimestamp() {
@@ -48,12 +49,12 @@ public class MessageUpdate extends Update {
     }
 
 
-    public void setChatId(int chatId) {
-        this.chatId = chatId;
+    public void setPeerId(int peerId) {
+        this.peerId = peerId;
     }
 
-    public int getChatId() {
-        return chatId;
+    public int getPeerId() {
+        return peerId;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class MessageUpdate extends Update {
                 .add("messageId", messageId)
                 .add("message", message)
                 .add("chatName", chatName)
-                .add("chatId", chatId)
+                .add("peerId", peerId)
                 .toString();
     }
 }

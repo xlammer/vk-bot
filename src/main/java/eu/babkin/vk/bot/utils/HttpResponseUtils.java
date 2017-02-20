@@ -1,15 +1,14 @@
 package eu.babkin.vk.bot.utils;
 
 import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 @Service
 public class HttpResponseUtils {
@@ -23,17 +22,13 @@ public class HttpResponseUtils {
         this.gson = gson;
     }
 
-    private static String contentToString(HttpResponse response) {
+    public <T> T toObject(HttpResponse response, Class<T> type) {
         try {
-            return IOUtils.toString(response.getEntity().getContent(), Charset.forName("UTF-8"));
+            String jsonString = EntityUtils.toString(response.getEntity());
+            return gson.fromJson(jsonString, type);
         } catch (IOException e) {
             logger.error("unable to extract content string from response {}", response, e);
             throw new RuntimeException(e);
         }
-    }
-
-    public <T> T fromResponse(HttpResponse response, Class<T> type) {
-        String jsonString = contentToString(response);
-        return gson.fromJson(jsonString, type);
     }
 }
