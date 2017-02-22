@@ -1,4 +1,4 @@
-package eu.babkin.vk.bot.photo;
+package eu.babkin.vk.bot.media.photo;
 
 import com.google.common.base.MoreObjects;
 

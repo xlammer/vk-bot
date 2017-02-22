@@ -25,6 +25,7 @@ public class HttpResponseUtils {
     public <T> T toObject(HttpResponse response, Class<T> type) {
         try {
             String jsonString = EntityUtils.toString(response.getEntity());
+            logger.debug("DS: {}", jsonString);
             return gson.fromJson(jsonString, type);
         } catch (IOException e) {
             logger.error("unable to extract content string from response {}", response, e);

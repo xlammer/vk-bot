@@ -40,6 +40,7 @@ public class PollingEventListener {
                                 HttpClient httpClient,
                                 List<UpdateListener<IncomingMessage>> messageListeners,
                                 HttpResponseUtils responseUtils) throws ClientException, ApiException {
+
         this.taskExecutor = taskExecutor;
         LongpollParams params = vk.messages().getLongPollServer(actor).execute();
 
@@ -52,11 +53,11 @@ public class PollingEventListener {
 
         this.ts = params.getTs();
 
-
-        logger.info("Event listener started");
         this.httpClient = httpClient;
         this.messageListeners = messageListeners;
         this.responseUtils = responseUtils;
+
+        logger.info("Event listener started");
     }
 
     public void start() {
@@ -71,12 +72,14 @@ public class PollingEventListener {
                 logger.error("polling event failed", e);
                 continue;
             }
-
+            //TODO: add error handling when long poll server times out
             ts = event.getTs();
 
             event.getUpdates().forEach(update -> {
                 if (update instanceof IncomingMessage) {
-                    taskExecutor.execute(() -> notifyMessageListeners((IncomingMessage) update));
+                    taskExecutor.execute(() -> {
+                        notifyMessageListeners((IncomingMessage) update);
+                    });
                 }
             });
         }

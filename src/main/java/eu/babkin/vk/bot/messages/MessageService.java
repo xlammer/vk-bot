@@ -2,6 +2,7 @@ package eu.babkin.vk.bot.messages;
 
 import com.vk.api.sdk.client.VkApiClient;
 import com.vk.api.sdk.client.actors.UserActor;
+import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.photos.Photo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,15 @@ public class MessageService {
         try {
             vk.messages().send(actor).peerId(peerId).attachment(toAttachment(photo)).execute();
         } catch (Exception e) {
-            logger.error("failed to send caht photo", e);
+            logger.error("failed to send chat photo", e);
+        }
+    }
+
+    public void sendChatDoc(Doc photo, int peerId) {
+        try {
+            vk.messages().send(actor).peerId(peerId).attachment(toAttachment(photo)).execute();
+        } catch (Exception e) {
+            logger.error("failed to send chat doc", e);
         }
     }
 

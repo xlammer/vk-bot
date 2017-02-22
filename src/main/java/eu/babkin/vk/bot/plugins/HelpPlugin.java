@@ -8,18 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class WelcomePlugin implements UpdateListener<IncomingMessage> {
+public class HelpPlugin implements UpdateListener<IncomingMessage> {
 
     private final MessageService messageService;
 
     @Autowired
-    public WelcomePlugin(MessageService messageService) {
+    public HelpPlugin(MessageService messageService) {
         this.messageService = messageService;
     }
 
     @Override
     public void onUpdate(IncomingMessage incomingMessage) {
-        if (BotCommands.WELCOME.equals(incomingMessage.getMessage())) {
+        if (BotCommands.HELP.equals(incomingMessage.getMessage())) {
             messageService.sendChatMessage("TODO: add --help", incomingMessage.getPeerId());
         }
     }

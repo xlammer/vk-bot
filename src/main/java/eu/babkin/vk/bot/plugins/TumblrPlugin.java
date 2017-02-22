@@ -9,8 +9,8 @@ import eu.babkin.vk.bot.BotCommands;
 import eu.babkin.vk.bot.messages.IncomingMessage;
 import eu.babkin.vk.bot.event.updates.UpdateListener;
 import eu.babkin.vk.bot.messages.MessageService;
-import eu.babkin.vk.bot.photo.PhotoUploadException;
-import eu.babkin.vk.bot.photo.PhotoUploader;
+import eu.babkin.vk.bot.media.MediaUploadException;
+import eu.babkin.vk.bot.media.MediaUploader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +29,18 @@ public class TumblrPlugin implements UpdateListener<IncomingMessage> {
 
     private final JumblrClient client;
     private final String blogUrl;
-    private final PhotoUploader photoUploader;
+    private final MediaUploader mediaUploader;
     private final MessageService messageService;
 
     @Autowired
     public TumblrPlugin(@Value("${tumblr.consumer.secret}") String consumerSecret,
                         @Value("${tumblr.consumer.key}") String consumerKey,
                         @Value("${tumblr.photo.source.blog}") String blogUrl,
-                        PhotoUploader photoUploader, MessageService messageService) {
+                        MediaUploader mediaUploader, MessageService messageService) {
 
         this.blogUrl = blogUrl;
         this.client = new JumblrClient(consumerKey, consumerSecret);
-        this.photoUploader = photoUploader;
+        this.mediaUploader = mediaUploader;
         this.messageService = messageService;
     }
 
@@ -66,9 +66,9 @@ public class TumblrPlugin implements UpdateListener<IncomingMessage> {
         if (BotCommands.TUMBLR.equals(incomingMessage.getMessage())) {
             String photoUrl = getRandomPhotoUrl();
             try {
-                Photo photo = photoUploader.uploadPhoto(photoUrl);
+                Photo photo = mediaUploader.uploadPhoto(photoUrl);
                 messageService.sendChatPhoto(photo, incomingMessage.getPeerId());
-            } catch (PhotoUploadException e) {
+            } catch (MediaUploadException e) {
                 logger.error("failed to upload photo", e);
             }
         }
