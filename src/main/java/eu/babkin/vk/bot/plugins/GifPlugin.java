@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -78,10 +79,11 @@ public class GifPlugin implements UpdateListener<IncomingMessage> {
     }
 
     private List<GiphyData> getGiphyData(String[] queryWords) throws GiphyException {
+        List<GiphyData> giphyData = Collections.emptyList();
         if (queryWords.length > 1) {
             String query = StringUtils.join(queryWords, " ", 1, queryWords.length);
-            return giphy.search(query, 40, 0).getDataList();
+            giphyData = giphy.search(query, 40, 0).getDataList();
         }
-        return giphy.trend().getDataList();
+        return giphyData.isEmpty() ? giphy.trend().getDataList() : giphyData;
     }
 }
