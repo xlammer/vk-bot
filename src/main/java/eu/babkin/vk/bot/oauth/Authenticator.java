@@ -23,14 +23,14 @@ public class Authenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(Authenticator.class);
 
+    private static final String VK_OAUTH_BASE = "https://oauth.vk.com";
+    private static final String VK_OAUTH_REDIRECT = VK_OAUTH_BASE + "/blank.html";
+
     @Value("${bot.client.id}")
     private int clientId;
 
     @Value("${bot.client.scope}")
     private String scope;
-
-    @Value("${bot.oauth.redirect.uri}")
-    private String redirectUri;
 
     @Value("${bot.secret.key}")
     private String secret;
@@ -57,7 +57,7 @@ public class Authenticator {
         $(By.id("install_allow")).click();
         $$(By.tagName("button")).stream().filter(e -> "Allow".equals(e.text())).findFirst().ifPresent(SelenideElement::click);
 
-        String token = WebDriverRunner.url().replace(redirectUri + "#code=", "");
+        String token = WebDriverRunner.url().replace(VK_OAUTH_REDIRECT + "#code=", "");
         WebDriverRunner.webdriverContainer.closeWebDriver();
         return token;
     }
@@ -66,14 +66,14 @@ public class Authenticator {
     public UserActor getUserActor() throws ClientException, ApiException {
         String code = getAccessToken();
         UserAuthResponse authResponse = vk.oauth()
-                .userAuthorizationCodeFlow(clientId, secret, redirectUri, code)
+                .userAuthorizationCodeFlow(clientId, secret, VK_OAUTH_REDIRECT, code)
                 .execute();
 
         return new UserActor(authResponse.getUserId(), authResponse.getAccessToken());
     }
 
     private String getOAuthUrl() {
-        return "https://oauth.vk.com/authorize?client_id=" + clientId + "&display=page&redirect_uri=" + redirectUri + "&scope=" + scope + "&response_type=code";
+        return VK_OAUTH_BASE + "/authorize?client_id=" + clientId + "&display=page&redirect_uri=" + VK_OAUTH_REDIRECT + "&scope=" + scope + "&response_type=code";
     }
 
 }
