@@ -4,6 +4,7 @@ import com.tumblr.jumblr.JumblrClient;
 import com.tumblr.jumblr.types.Blog;
 import com.tumblr.jumblr.types.PhotoPost;
 import com.tumblr.jumblr.types.Post;
+import com.vk.api.sdk.objects.docs.Doc;
 import com.vk.api.sdk.objects.photos.Photo;
 import eu.babkin.vk.bot.BotCommands;
 import eu.babkin.vk.bot.messages.IncomingMessage;
@@ -26,6 +27,7 @@ import java.util.Random;
 public class TumblrPlugin implements UpdateListener<IncomingMessage> {
 
     private static final Logger logger = LoggerFactory.getLogger(TumblrPlugin.class);
+    public static final String GIF = ".gif";
 
     private final JumblrClient client;
     private final String blogUrl;
@@ -44,7 +46,7 @@ public class TumblrPlugin implements UpdateListener<IncomingMessage> {
         this.messageService = messageService;
     }
 
-    private String getRandomPhotoUrl() {
+    private String getRandomPictureUrl() {
         Blog blog = client.blogInfo(blogUrl);
 
         Map<String, Integer> options = new HashMap<>();
@@ -58,16 +60,21 @@ public class TumblrPlugin implements UpdateListener<IncomingMessage> {
             PhotoPost photoPost = (PhotoPost) post;
             return photoPost.getPhotos().get(0).getOriginalSize().getUrl();
         }
-        return getRandomPhotoUrl();
+        return getRandomPictureUrl();
     }
 
     @Override
     public void onUpdate(IncomingMessage incomingMessage) {
         if (BotCommands.TUMBLR.equals(incomingMessage.getMessage())) {
-            String photoUrl = getRandomPhotoUrl();
+            String pictureUrl = getRandomPictureUrl();
             try {
-                Photo photo = mediaUploader.uploadPhoto(photoUrl);
-                messageService.sendChatPhoto(photo, incomingMessage.getPeerId());
+                if (pictureUrl.endsWith(GIF)) {
+                    Doc doc = mediaUploader.uploadDocument(pictureUrl);
+                    messageService.sendChatDoc(doc, incomingMessage.getPeerId());
+                } else {
+                    Photo photo = mediaUploader.uploadPhoto(pictureUrl);
+                    messageService.sendChatPhoto(photo, incomingMessage.getPeerId());
+                }
             } catch (MediaUploadException e) {
                 logger.error("failed to upload photo", e);
             }

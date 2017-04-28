@@ -117,9 +117,9 @@ public class MediaUploader {
         }
 
         DocumentMetadata docMeta = responseUtils.toObject(response, DocumentMetadata.class);
-        logger.info("saving photo {}", docMeta);
+        logger.info("saving doc {}", docMeta);
 
-        List<Doc> docs = null;
+        List<Doc> docs;
         try {
             docs = vk.docs().save(actor, docMeta.getFile()).execute();
         } catch (Exception e) {
